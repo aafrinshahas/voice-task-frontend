@@ -129,7 +129,7 @@ export default function VoiceInput() {
 ) : (
 <div className="text-center">
 <p>Microphone is <span className="text-red-400 font-semibold">OFF</span></p>
-{transcript ?   <p className="text-xl capitalize"><b>Task:</b> {transcript}</p>: ''}
+{/* {transcript ?   <p className="text-xl capitalize"><b>Task:</b> {transcript}</p>: ''} */}
 </div>
 
 )}

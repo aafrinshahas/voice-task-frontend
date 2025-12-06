@@ -23,7 +23,7 @@ type="text"
 placeholder="Search tasks..."
 value={searchText}
 onChange={(e) => setSearchText(e.target.value)}
-className="focus:outline-none"
+className="focus:outline-none w-full outline-none"
 />
 </div>
 
@@ -35,7 +35,7 @@ className="focus:outline-none"
 <select
 value={filterStatus}
 onChange={(e) => setFilterStatus(e.target.value)}
-className="px-2 focus:outline-none w-full"
+className="px-2 focus:outline-none w-full outline-none"
 >
 <option value="All" className="text-black">All Status</option>
 <option value="To Do" className="text-black">To Do</option>
@@ -50,7 +50,7 @@ className="px-2 focus:outline-none w-full"
 <select
 value={filterPriority}
 onChange={(e) => setFilterPriority(e.target.value)}
-className="px-2 focus:outline-none w-full"
+className="px-2 focus:outline-none w-full outline-none"
 >
 <option value="All" className="text-black">All Priority</option>
 <option value="High" className="text-black">High</option>
@@ -65,7 +65,7 @@ className="px-2 focus:outline-none w-full"
 <select
 value={filterDue}
 onChange={(e) => setFilterDue(e.target.value)}
-className="px-2 focus:outline-none w-full"
+className="px-2 focus:outline-none w-full outline-none"
 >
 <option value="All" className="text-black">All Dates</option>
 <option value="Today" className="text-black">Today</option>

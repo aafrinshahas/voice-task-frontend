@@ -65,7 +65,7 @@ className="border border-b-red-200 w-full rounded-lg p-2 mt-3 focus:outline-none
 </div>
 
 
-<button onClick={saveTask} className="rounded-xl py-3 px-6 font-semibold cursor-pointer shadow-md mt-6" style={{ backgroundImage: 'linear-gradient(45deg, #D71295 20%, #34227E 80%)'}}>Create Task</button>
+<button onClick={saveTask} className="rounded-xl py-3 px-6 font-semibold cursor-pointer shadow-md mt-6 outline-none" style={{ backgroundImage: 'linear-gradient(45deg, #D71295 20%, #34227E 80%)'}}>Create Task</button>
 </div>
 </>
 )

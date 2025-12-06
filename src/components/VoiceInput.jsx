@@ -90,7 +90,7 @@ export default function VoiceInput() {
       <div className="flex items-center gap-8">
         <button
           onClick={handleStart}
-          className="w-20 h-20 rounded-full flex items-center justify-center shadow-md cursor-pointer"
+          className="w-20 h-20 rounded-full flex items-center justify-center shadow-md cursor-pointer focus:outline-none outline-none"
           style={{ backgroundImage: "linear-gradient(180deg, #130214 30%, #34227E 100%)" }}
         >
           {isMicOn ? (
@@ -104,7 +104,7 @@ export default function VoiceInput() {
 
         <button
           onClick={handleStop}
-          className="rounded-xl py-3 px-6 font-semibold cursor-pointer shadow-md"
+          className="rounded-xl py-3 px-6 font-semibold cursor-pointer shadow-md outline-none"
           style={{ backgroundImage: "linear-gradient(45deg, #D71295 20%, #34227E 80%)" }}
         >
           Stop & Parse

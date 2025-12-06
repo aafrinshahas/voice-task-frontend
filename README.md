@@ -21,7 +21,7 @@ This project demonstrates seamless integration of voice processing, natural-lang
 
 Clone the Repository:
 
-git clone https://github.com/aafrinshahas/voice-enabled-task-backend.git
+git clone https://github.com/aafrinshahas/voice-task-frontend.git
 
 Install Dependencies:
 

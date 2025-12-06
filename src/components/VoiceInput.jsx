@@ -111,7 +111,7 @@ export default function VoiceInput() {
         </button>
       </div>
 
-      <div className="text-center">
+      {/* <div className="text-center">
         <p>
           Microphone is{" "}
           <span className="text-red-400 font-semibold">
@@ -119,7 +119,20 @@ export default function VoiceInput() {
           </span>
         </p>
         {transcript && <p className="text-xl capitalize"><b>Task:</b> {transcript}</p>}
-      </div>
+      </div> */}
+
+      {isMicOn ? (
+<div className="text-center">
+<p className="mb-3">Microphone is <span className="text-red-400 font-semibold">ON</span></p>
+<p className="text-xl capitalize"><b>Task:</b> {transcript}</p>
+</div>
+) : (
+<div className="text-center">
+<p>Microphone is <span className="text-red-400 font-semibold">OFF</span></p>
+{transcript ?   <p className="text-xl capitalize"><b>Task:</b> {transcript}</p>: ''}
+</div>
+
+)}
 
       {hasParsed && (
         <TaskCreate

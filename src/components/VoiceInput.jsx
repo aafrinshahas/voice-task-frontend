@@ -1,5 +1,5 @@
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { parseVoiceCommand } from "../utils/parseVoice";
 import { useTasks } from "../context/TaskContext";
 import audiowaves from "../assets/images/audio-waves.png";
@@ -8,6 +8,12 @@ import TaskCreate from "./TaskCreate";
 export default function VoiceInput() {
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
   const { createTask } = useTasks();
+
+  const micStreamRef = useRef(null);
+  const [isMicOn, setIsMicOn] = useState(false);
+
+  const [parsed, setParsed] = useState(null);
+  const [hasParsed, setHasParsed] = useState(false);
 
   function toLocalInputValue(date) {
     const d = new Date(date);
@@ -19,42 +25,36 @@ export default function VoiceInput() {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   }
 
-  const [parsed, setParsed] = useState(null);
-  const [hasParsed, setHasParsed] = useState(false);
-
-  // 🔥 STORE mic stream so we can fully stop it later
-  let localStream = null;
-
-  // FORCE STOP MICROPHONE — fixes Chrome/Vercel issue
-  function forceStopMic() {
-    if (localStream) {
-      localStream.getTracks().forEach((track) => track.stop());
-    }
-  }
-
-  // START LISTENING
   const handleStart = async () => {
     setHasParsed(false);
+    resetTranscript();
 
     try {
-      // Request mic permission + get stream
-      localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Request mic permission and store stream
+      micStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      // Start recognition AFTER permission granted
+      // Start listening
       SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
-    } catch (error) {
-      alert("Microphone permission denied. Please enable the microphone.");
-      console.error("Mic error:", error);
+
+      setIsMicOn(true);
+    } catch (err) {
+      alert("Please enable the microphone permission.");
+      console.error(err);
     }
   };
 
-  // STOP LISTENING
   const handleStop = () => {
-    SpeechRecognition.stopListening(); // Stop STT
-    forceStopMic();                    // 🛑 FULL mic OFF fix
+    SpeechRecognition.stopListening();
+    setIsMicOn(false);
 
-    if (!transcript || transcript.trim().length === 0) {
-      alert("No voice input detected. Please speak before stopping.");
+    // FULL FORCE STOP (fix for Chrome on Vercel)
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach((t) => t.stop());
+      micStreamRef.current = null;
+    }
+
+    if (!transcript.trim()) {
+      alert("No voice detected.");
       return;
     }
 
@@ -68,17 +68,16 @@ export default function VoiceInput() {
   };
 
   const saveTask = () => {
-    if (!parsed?.title || !parsed.title.trim()) {
-      alert("Please provide a title for the task before saving.");
+    if (!parsed?.title?.trim()) {
+      alert("Please provide a title.");
       return;
     }
 
-    const finalData = {
+    createTask({
       ...parsed,
       dueDate: parsed.dueDate ? new Date(parsed.dueDate).toISOString() : null,
-    };
+    });
 
-    createTask(finalData);
     setParsed(null);
     setHasParsed(false);
     resetTranscript();
@@ -86,79 +85,42 @@ export default function VoiceInput() {
 
   return (
     <div className="flex items-center justify-center flex-col gap-8">
-      <h2 className="text-2xl">
-        Here, I can help you to track tasks using your voice. Press Start to record your task.
-      </h2>
+      <h2 className="text-2xl">Create tasks using your voice.</h2>
 
       <div className="flex items-center gap-8">
-        {/* START BUTTON */}
         <button
           onClick={handleStart}
-          className="w-20 h-20 rounded-full flex items-center justify-center shadow-md shadow-slate-900 cursor-pointer"
-          style={{
-            backgroundImage: "linear-gradient(180deg, #130214 30%, #34227E 100%)",
-          }}
+          className="w-20 h-20 rounded-full flex items-center justify-center shadow-md cursor-pointer"
+          style={{ backgroundImage: "linear-gradient(180deg, #130214 30%, #34227E 100%)" }}
         >
-          {listening ? (
+          {isMicOn ? (
             <img src={audiowaves} className="w-[60px] h-[60px]" />
           ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
-              stroke="#fff"
-              className="size-8"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z"
-              />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2" className="size-8">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z"/>
             </svg>
           )}
         </button>
 
-        {/* STOP BUTTON */}
         <button
           onClick={handleStop}
           className="rounded-xl py-3 px-6 font-semibold cursor-pointer shadow-md"
-          style={{
-            backgroundImage: "linear-gradient(45deg, #D71295 20%, #34227E 80%)",
-          }}
+          style={{ backgroundImage: "linear-gradient(45deg, #D71295 20%, #34227E 80%)" }}
         >
           Stop & Parse
         </button>
       </div>
 
-      {/* TRANSCRIPT */}
-      <div>
-        {listening ? (
-          <div className="text-center">
-            <p className="mb-3">
-              Microphone is <span className="text-red-400 font-semibold">ON</span>
-            </p>
-            <p className="text-xl capitalize">
-              <b>Task:</b> {transcript}
-            </p>
-          </div>
-        ) : (
-          <div className="text-center">
-            <p>
-              Microphone is <span className="text-red-400 font-semibold">OFF</span>
-            </p>
-            {transcript ? (
-              <p className="text-xl capitalize">
-                <b>Task:</b> {transcript}
-              </p>
-            ) : (
-              ""
-            )}
-          </div>
-        )}
+      <div className="text-center">
+        <p>
+          Microphone is{" "}
+          <span className="text-red-400 font-semibold">
+            {isMicOn ? "ON" : "OFF"}
+          </span>
+        </p>
+        {transcript && <p className="text-xl capitalize"><b>Task:</b> {transcript}</p>}
       </div>
 
-      {/* PARSE RESULT UI */}
       {hasParsed && (
         <TaskCreate
           parsed={parsed}

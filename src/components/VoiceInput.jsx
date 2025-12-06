@@ -22,24 +22,36 @@ export default function VoiceInput() {
   const [parsed, setParsed] = useState(null);
   const [hasParsed, setHasParsed] = useState(false);
 
-  // 🔥 FIX: FORCE MICROPHONE PERMISSION POPUP
+  // 🔥 STORE mic stream so we can fully stop it later
+  let localStream = null;
+
+  // FORCE STOP MICROPHONE — fixes Chrome/Vercel issue
+  function forceStopMic() {
+    if (localStream) {
+      localStream.getTracks().forEach((track) => track.stop());
+    }
+  }
+
+  // START LISTENING
   const handleStart = async () => {
     setHasParsed(false);
 
     try {
-      // This triggers Chrome's permission dialog (required in Vercel)
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Request mic permission + get stream
+      localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      // Start listening AFTER permission granted
+      // Start recognition AFTER permission granted
       SpeechRecognition.startListening({ continuous: true, language: "en-IN" });
     } catch (error) {
-      alert("Microphone permission denied. Please allow microphone access in browser settings.");
+      alert("Microphone permission denied. Please enable the microphone.");
       console.error("Mic error:", error);
     }
   };
 
+  // STOP LISTENING
   const handleStop = () => {
-    SpeechRecognition.stopListening();
+    SpeechRecognition.stopListening(); // Stop STT
+    forceStopMic();                    // 🛑 FULL mic OFF fix
 
     if (!transcript || transcript.trim().length === 0) {
       alert("No voice input detected. Please speak before stopping.");
@@ -75,11 +87,11 @@ export default function VoiceInput() {
   return (
     <div className="flex items-center justify-center flex-col gap-8">
       <h2 className="text-2xl">
-        Here, I can help you to track tasks using your voice, Press and Hold to start create your Task.
+        Here, I can help you to track tasks using your voice. Press Start to record your task.
       </h2>
 
       <div className="flex items-center gap-8">
-        {/* Start Button */}
+        {/* START BUTTON */}
         <button
           onClick={handleStart}
           className="w-20 h-20 rounded-full flex items-center justify-center shadow-md shadow-slate-900 cursor-pointer"
@@ -107,7 +119,7 @@ export default function VoiceInput() {
           )}
         </button>
 
-        {/* Stop Button */}
+        {/* STOP BUTTON */}
         <button
           onClick={handleStop}
           className="rounded-xl py-3 px-6 font-semibold cursor-pointer shadow-md"
@@ -119,7 +131,7 @@ export default function VoiceInput() {
         </button>
       </div>
 
-      {/* Transcript */}
+      {/* TRANSCRIPT */}
       <div>
         {listening ? (
           <div className="text-center">
@@ -146,7 +158,7 @@ export default function VoiceInput() {
         )}
       </div>
 
-      {/* Parsed Panel */}
+      {/* PARSE RESULT UI */}
       {hasParsed && (
         <TaskCreate
           parsed={parsed}

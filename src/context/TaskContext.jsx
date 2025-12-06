@@ -5,7 +5,7 @@ import axios from "axios";
 
 const TaskContext = createContext();
 
-const API_BASE = "https://backend-xnum.onrender.com/api/tasks";
+const API_BASE = "https://voice-task-backend-zxa6.onrender.com/api/tasks";
 
 export const TaskProvider = ({ children }) => {
   const [tasks, setTasks] = useState([]);
